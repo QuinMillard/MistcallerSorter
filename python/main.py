@@ -30,6 +30,9 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+def print_info(message):
+    print(Colors.OKGREEN + message + Colors.ENDC)
+
 def print_success(message):
     print(Colors.OKBLUE + message + Colors.ENDC)
 
@@ -58,7 +61,7 @@ def process_results(raw_results):
         #print_failure("No match detected.\n")
         return None
     else:
-        print_warning("Matched: {} ({})".format(matched_card.name, ', '.join(matched_card.color_identity)))
+        print_info("Matched: {} ({})".format(matched_card.name, ', '.join(matched_card.color_identity)))
 
     for rule in rules:
         if rule.predicate(matched_card):
@@ -77,8 +80,8 @@ bin_controller.connect()
 retries = 0
 
 for raw_results_up, raw_results_down in VideoTextRecognizer(source=0,threshold=1).decode_from_stream():
-    print("Raw up: {}".format(raw_results_up))
-    print("Raw down: {}".format(raw_results_down))
+    #print("Raw up: {}".format(raw_results_up))
+    #print("Raw down: {}".format(raw_results_down))
 
     bin_up = process_results(raw_results_up)
     bin_down = process_results(raw_results_down)
@@ -86,13 +89,15 @@ for raw_results_up, raw_results_down in VideoTextRecognizer(source=0,threshold=1
     if (bin_up == None and bin_down == None):
         print_failure("No match detected.\n")
         if retries >= RETRY_COUNT:
+            print_warning("Retries exhausted. Placing card in error bin.\n")
             bin_controller.place_in_bin(ERROR_BIN)
             retries = 0
         else:
             retries += 1
     if bin_up != None and bin_down != None:
-        print_failure("What the fuck? This shouldn't happen.\n")
+        print_failure("Matches detected in both up and down cases... wut?\n")
         if retries >= RETRY_COUNT:
+            print_warning("Retries exhausted. Placing card in error bin.\n")
             bin_controller.place_in_bin(ERROR_BIN)
             retries = 0
         else:
