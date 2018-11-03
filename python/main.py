@@ -42,17 +42,11 @@ def print_warning(message):
 ## -----------------------------------------------
 
 def candidate_names(raw_results):
-    detected_strings = list(filter(lambda x: x != '',map(lambda str : re.sub(r'\W+', '', str), raw_results)))
+    detected_strings = list(map(lambda str : re.sub(r'\W+', '', str), raw_results))
     permutations = list(itertools.permutations(detected_strings))
-    return list(map(lambda x: ' '.join(x), permutations))
+    return list(filter(lambda x: x != ' ', map(lambda x: ' '.join(x), permutations)))
 
-## -----------------------------------------------
-
-bin_controller = BinController()
-bin_controller.connect()
-
-retries = 0
-for raw_results in VideoTextRecognizer(source=0,threshold=1).decode_from_stream():
+def process_results(raw_results):
     #print("Raw: {}".format(raw_results))
 
     candidates = candidate_names(raw_results)
@@ -61,28 +55,56 @@ for raw_results in VideoTextRecognizer(source=0,threshold=1).decode_from_stream(
     matched_card = Card.lookup(candidates)
 
     if matched_card == None:
+        #print_failure("No match detected.\n")
+        return None
+    else:
+        print_warning("Matched: {} ({})".format(matched_card.name, ', '.join(matched_card.color_identity)))
+
+    for rule in rules:
+        if rule.predicate(matched_card):
+            #print_success("Placing card in bin {}\n".format(rule.target_bin))
+            return rule.target_bin
+        else:
+            continue
+
+    return ERROR_BIN
+
+## -----------------------------------------------
+
+bin_controller = BinController()
+bin_controller.connect()
+
+retries = 0
+
+for raw_results_up, raw_results_down in VideoTextRecognizer(source=0,threshold=1).decode_from_stream():
+    print("Raw up: {}".format(raw_results_up))
+    print("Raw down: {}".format(raw_results_down))
+
+    bin_up = process_results(raw_results_up)
+    bin_down = process_results(raw_results_down)
+
+    if (bin_up == None and bin_down == None):
         print_failure("No match detected.\n")
         if retries >= RETRY_COUNT:
             bin_controller.place_in_bin(ERROR_BIN)
             retries = 0
         else:
             retries += 1
-            continue
-    else:
-        print_warning("Matched: {} ({})".format(matched_card.name, ', '.join(matched_card.color_identity)))
-
-    for rule in rules:
-        if rule.predicate(matched_card):
-            print_success("Placing card in bin {}\n".format(rule.target_bin))
-            bin_controller.place_in_bin(rule.target_bin)
+    if bin_up != None and bin_down != None:
+        print_failure("What the fuck? This shouldn't happen.\n")
+        if retries >= RETRY_COUNT:
+            bin_controller.place_in_bin(ERROR_BIN)
             retries = 0
-            break
         else:
-            continue
-
-    # Shouldn't get here as long as the rules are programmed sanely, since if you get a match you should satisfy a rule
-    bin_controller.place_in_bin(ERROR_BIN)
-    retries = 0
+            retries += 1
+    if bin_up != None and bin_down == None:
+        print_success("Card was right side up. Placing in bin {}.\n".format(bin_up))
+        bin_controller.place_in_bin(bin_up)
+        retries = 0
+    if bin_up == None and bin_down != None:
+        print_success("Card was upside down. Placing in bin {}.\n".format(bin_down))
+        bin_controller.place_in_bin(bin_down)
+        retries = 0
 
 bin_controller.close()
 print("[INFO] Closing.")
