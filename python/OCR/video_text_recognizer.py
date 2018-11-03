@@ -140,8 +140,17 @@ class VideoTextRecognizer:
                 endY = int(endY * rH) + self.RECTANGLE_SIZE_OFFSET
 
                 cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+
                 roi = orig[startY:endY, startX:endX]
-                results.append(self.get_string(roi, self.THRESHOLD))
+
+                flipped_roi = roi.copy()
+                flipped_roi = imutils.rotate(flipped_roi, angle=180)
+
+                best_match = self.get_string(roi, self.THRESHOLD)
+                best_flipped_match = self.get_string(flipped_roi, self.THRESHOLD)
+
+                results.append(best_match)
+                results.append(best_flipped_match)
 
             yield results
 

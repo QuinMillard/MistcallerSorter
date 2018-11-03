@@ -42,7 +42,7 @@ def print_warning(message):
 ## -----------------------------------------------
 
 def candidate_names(raw_results):
-    detected_strings = list(filter(lambda x: x != '',map(lambda str : re.sub(r'\W+', '', str), raw_results)))
+    detected_strings = list(map(lambda str : re.sub(r'\W+', '', str), raw_results))
     permutations = list(itertools.permutations(detected_strings))
     return list(map(lambda x: ' '.join(x), permutations))
 
@@ -53,10 +53,10 @@ bin_controller.connect()
 
 retries = 0
 for raw_results in VideoTextRecognizer(source=0,threshold=1).decode_from_stream():
-    #print("Raw: {}".format(raw_results))
+    print("Raw: {}".format(raw_results))
 
     candidates = candidate_names(raw_results)
-    #print("Candidates: {}".format(candidates))
+    print("Candidates: {}".format(candidates))
 
     matched_card = Card.lookup(candidates)
 
@@ -67,7 +67,7 @@ for raw_results in VideoTextRecognizer(source=0,threshold=1).decode_from_stream(
             retries = 0
         else:
             retries += 1
-            continue
+        continue
     else:
         print_warning("Matched: {} ({})".format(matched_card.name, ', '.join(matched_card.color_identity)))
 
