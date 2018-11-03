@@ -114,7 +114,15 @@ class VideoTextRecognizer:
                 break
 
             frame = imutils.resize(frame, width=1000)
+
+            flipped_frame = frame.copy
+            flipped_frame = imutils.rotate(flipped_frame, angle=180)
+
             orig = frame.copy()
+
+            results = []
+
+            # do things for the right side up case
 
             if W is None or H is None:
                 (H, W) = frame.shape[:2]
@@ -131,7 +139,32 @@ class VideoTextRecognizer:
             (rects, confidences) = self.decode_predictions(scores, geometry)
             boxes = non_max_suppression(np.array(rects), probs=confidences)
 
-            results = []
+            for (startX, startY, endX, endY) in boxes:
+                startX = int(startX * rW) - self.RECTANGLE_SIZE_OFFSET
+                startY = int(startY * rH) - self.RECTANGLE_SIZE_OFFSET
+                endX = int(endX * rW) + self.RECTANGLE_SIZE_OFFSET
+                endY = int(endY * rH) + self.RECTANGLE_SIZE_OFFSET
+
+                cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+                roi = orig[startY:endY, startX:endX]
+                results.append(self.get_string(roi, self.THRESHOLD))
+
+            # do things for the flipped case
+
+            if W is None or H is None:
+                (H, W) = flipped_frame.shape[:2]
+                rW = W / float(newW)
+                rH = H / float(newH)
+
+            frame = cv2.resize(frame, (newW, newH))
+
+            blob = cv2.dnn.blobFromImage(frame, 1.0, (newW, newH),
+                (123.68, 116.78, 103.94), swapRB=True, crop=False)
+            net.setInput(blob)
+            (scores, geometry) = net.forward(layerNames)
+
+            (rects, confidences) = self.decode_predictions(scores, geometry)
+            boxes = non_max_suppression(np.array(rects), probs=confidences)
 
             for (startX, startY, endX, endY) in boxes:
                 startX = int(startX * rW) - self.RECTANGLE_SIZE_OFFSET
@@ -142,6 +175,8 @@ class VideoTextRecognizer:
                 cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
                 roi = orig[startY:endY, startX:endX]
                 results.append(self.get_string(roi, self.THRESHOLD))
+
+            # end
 
             yield results
 
