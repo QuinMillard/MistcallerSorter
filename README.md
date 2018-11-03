@@ -6,5 +6,6 @@ We sort cards and stuff. Uses Python3, OpenCV, and Arduino
 Try running 
 
 ```
-python3 bullshit.py
+cd python
+python3 main.py
 ```
