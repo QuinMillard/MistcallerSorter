@@ -25,7 +25,7 @@ def candidate_names(raw_results):
     return list(map(lambda x: ' '.join(x), permutations))
 
 def mtg_json_lookup(names):
-    with open('card_color_identities.json', 'r') as f:
+    with open('../json/card_color_identities.json', 'r') as f:
         cards = json.load(f)
 
     for name in names:
