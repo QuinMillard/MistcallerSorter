@@ -10,16 +10,16 @@ class BinController:
         self.ser.close()
 
     def place_in_bin_1(self):
-        ser.write(b'1')
+        self.ser.write(b'1')
 
     def place_in_bin_2(self):
-        ser.write(b'2')
+        self.ser.write(b'2')
 
     def place_in_bin_3(self):
-        ser.write(b'3')
+        self.ser.write(b'3')
 
     def place_in_bin_4(self):
-        ser.write(b'4')
+        self.ser.write(b'4')
 
     def place_in_bin_5(self):
-        ser.write(b'5')
+        self.ser.write(b'5')
