@@ -155,7 +155,7 @@ class VideoTextRecognizer:
 
         fps.stop()
 
-        print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+        print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
         vs.stop()
