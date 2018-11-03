@@ -131,7 +131,8 @@ class VideoTextRecognizer:
             (rects, confidences) = self.decode_predictions(scores, geometry)
             boxes = non_max_suppression(np.array(rects), probs=confidences)
 
-            results = []
+            results_up = []
+            results_down = []
 
             for (startX, startY, endX, endY) in boxes:
                 startX = int(startX * rW) - self.RECTANGLE_SIZE_OFFSET
@@ -149,10 +150,10 @@ class VideoTextRecognizer:
                 best_match = self.get_string(roi, self.THRESHOLD)
                 best_flipped_match = self.get_string(flipped_roi, self.THRESHOLD)
 
-                results.append(best_match)
-                results.append(best_flipped_match)
+                results_up.append(best_match)
+                results_down.append(best_flipped_match)
 
-            yield results
+            yield results_up, results_down
 
             fps.update()
 
