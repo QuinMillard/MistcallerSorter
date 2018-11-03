@@ -11,11 +11,11 @@ import shutil
 import pytesseract
 
 class VideoTextRecognizer:
-    def __init__(self):
-        self.SOURCE = 1
-        self.THRESHOLD = 7
-        self.RECTANGLE_SIZE_OFFSET = 3
-        self.MIN_CONFIDENCE = 0.5
+    def __init__(self, source=1,threshold=7,rectangle_size_offset=3,min_confidence=0.5):
+        self.SOURCE = source
+        self.THRESHOLD = threshold
+        self.RECTANGLE_SIZE_OFFSET = rectangle_size_offset
+        self.MIN_CONFIDENCE = min_confidence
 
     def crop_image(self, img, start_x, start_y, end_x, end_y):
         cropped = img[start_y:end_y, start_x:end_x]
@@ -89,17 +89,8 @@ class VideoTextRecognizer:
         return (rects, confidences)
 
     def decode_from_stream(self):
-        ap = argparse.ArgumentParser()
-        ap.add_argument("-v", "--video", type=str,
-            help="path to optinal input video file")
-        ap.add_argument("-w", "--width", type=int, default=320,
-            help="resized image width (should be multiple of 32)")
-        ap.add_argument("-e", "--height", type=int, default=320,
-            help="resized image height (should be multiple of 32)")
-        args = vars(ap.parse_args())
-
         (W, H) = (None, None)
-        (newW, newH) = (args["width"], args["height"])
+        (newW, newH) = (320, 320)
         (rW, rH) = (None, None)
 
         layerNames = [

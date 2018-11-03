@@ -35,7 +35,7 @@ def mtg_json_lookup(names):
         except KeyError:
             continue
 
-for raw_results in VideoTextRecognizer().decode_from_stream():
+for raw_results in VideoTextRecognizer(threshold=1).decode_from_stream():
     print("Raw: {}".format(raw_results))
 
     candidates = candidate_names(raw_results)
