@@ -2,6 +2,7 @@ from OCR.video_text_recognizer import VideoTextRecognizer
 from card import Card
 from rule import Rule
 from bin_controller import BinController
+import csv
 import re
 import itertools
 
@@ -9,16 +10,6 @@ import itertools
 
 RETRY_COUNT = 4
 ERROR_BIN = 5
-
-rules = [
-    Rule(lambda card: 'U' in card.color_identity, 1), # Blue cards to bin 1
-    Rule(lambda card: 'R' in card.color_identity, 2), # Red cards to bin 2
-    Rule(lambda card: 'W' in card.color_identity, 3), # White cards to bin 3
-    Rule(lambda card: True, 4), # Everything else (i.e. black and green) to bin 4
-    # Everything that the camera fails to read will go to the ERROR_BIN, which is 5
-]
-
-rules = rules_from_csv('user_input.csv')
 
 ## -----------------------------------------------
 
@@ -87,6 +78,16 @@ def process_results(raw_results):
     return ERROR_BIN
 
 ## -----------------------------------------------
+
+rules = [
+    Rule(lambda card: 'U' in card.color_identity, 1), # Blue cards to bin 1
+    Rule(lambda card: 'R' in card.color_identity, 2), # Red cards to bin 2
+    Rule(lambda card: 'W' in card.color_identity, 3), # White cards to bin 3
+    Rule(lambda card: True, 4), # Everything else (i.e. black and green) to bin 4
+    # Everything that the camera fails to read will go to the ERROR_BIN, which is 5
+]
+
+#rules = rules_from_csv('user_input.csv')
 
 bin_controller = BinController()
 bin_controller.connect()
