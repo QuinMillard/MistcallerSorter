@@ -18,6 +18,8 @@ rules = [
     # Everything that the camera fails to read will go to the ERROR_BIN, which is 5
 ]
 
+rules = rules_from_csv('user_input.csv')
+
 ## -----------------------------------------------
 
 class Colors:
@@ -41,6 +43,18 @@ def print_failure(message):
 
 def print_warning(message):
     print(Colors.WARNING + message + Colors.ENDC)
+
+## -----------------------------------------------
+
+def rules_from_csv(file_name):
+    rules = []
+    with open('user_input.csv', 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in reader:
+            bin = row[0]
+            colour = row[1]
+            rules.append(Rule(lambda card: colour in card.color_identity, bin))
+    return rules
 
 ## -----------------------------------------------
 

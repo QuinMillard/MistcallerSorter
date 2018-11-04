@@ -114,6 +114,7 @@ class VideoTextRecognizer:
                 break
 
             frame = imutils.resize(frame, width=1000)
+            frame = imutils.rotate(frame, angle=90)
             orig = frame.copy()
 
             if W is None or H is None:
